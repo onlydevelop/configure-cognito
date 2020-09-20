@@ -137,14 +137,13 @@ resource "aws_api_gateway_integration" "cognito_api_integration" {
 }
 
 resource "aws_api_gateway_integration" "cognito_api_integration_options" {
-  rest_api_id             = aws_api_gateway_rest_api.cognito_api.id
-  resource_id             = aws_api_gateway_resource.cognito_api_resource.id
-  http_method             = aws_api_gateway_method.cognito_api_method_options.http_method
-  integration_http_method = "POST"
-  type                    = "AWS"
-  content_handling        = "CONVERT_TO_TEXT"
-  passthrough_behavior    = "WHEN_NO_MATCH"
-  uri                     = aws_lambda_function.cognito_lambda.invoke_arn
+  rest_api_id          = aws_api_gateway_rest_api.cognito_api.id
+  resource_id          = aws_api_gateway_resource.cognito_api_resource.id
+  http_method          = aws_api_gateway_method.cognito_api_method_options.http_method
+  type                 = "MOCK"
+  content_handling     = "CONVERT_TO_TEXT"
+  passthrough_behavior = "WHEN_NO_MATCH"
+  uri                  = aws_lambda_function.cognito_lambda.invoke_arn
   request_templates = {
     "application/json" = "{ \"statusCode\": 200 }"
   }
@@ -167,6 +166,23 @@ resource "aws_api_gateway_method_response" "cognito_api_gateway_method_response"
   ]
 }
 
+resource "aws_api_gateway_method_response" "cognito_api_gateway_method_response_options" {
+  rest_api_id = aws_api_gateway_rest_api.cognito_api.id
+  resource_id = aws_api_gateway_resource.cognito_api_resource.id
+  http_method = aws_api_gateway_method.cognito_api_method_options.http_method
+  status_code = 200
+
+  response_parameters = local.method_response_parameters
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  depends_on = [
+    aws_api_gateway_method.cognito_api_method_options,
+  ]
+}
+
 resource "aws_api_gateway_integration_response" "cognito_api_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.cognito_api.id
   resource_id = aws_api_gateway_resource.cognito_api_resource.id
@@ -178,6 +194,20 @@ resource "aws_api_gateway_integration_response" "cognito_api_integration_respons
   depends_on = [
     aws_api_gateway_integration.cognito_api_integration,
     aws_api_gateway_method_response.cognito_api_gateway_method_response,
+  ]
+}
+
+resource "aws_api_gateway_integration_response" "cognito_api_integration_response_options" {
+  rest_api_id = aws_api_gateway_rest_api.cognito_api.id
+  resource_id = aws_api_gateway_resource.cognito_api_resource.id
+  http_method = aws_api_gateway_method.cognito_api_method_options.http_method
+  status_code = 200
+
+  response_parameters = local.integration_response_parameters
+
+  depends_on = [
+    aws_api_gateway_integration.cognito_api_integration,
+    aws_api_gateway_method_response.cognito_api_gateway_method_response_options,
   ]
 }
 
