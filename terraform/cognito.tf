@@ -1,3 +1,7 @@
+locals {
+  domain = "myexamplepool"
+}
+
 resource "aws_cognito_user_pool" "pool" {
   name                     = "TfPool"
   auto_verified_attributes = ["email"]
@@ -18,10 +22,16 @@ resource "aws_cognito_user_pool" "pool" {
 
     string_attribute_constraints {
       min_length = 7
-      max_length = 15
+      max_length = 50
     }
   }
 }
+
+resource "aws_cognito_user_pool_domain" "main" {
+  domain       = local.domain
+  user_pool_id = aws_cognito_user_pool.pool.id
+}
+
 
 resource "aws_cognito_user_pool_client" "client" {
   name                 = "TfAppClient"
